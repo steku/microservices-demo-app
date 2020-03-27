@@ -1,0 +1,17 @@
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: {{ include "ms-demo.fullname" . }}
+  labels:
+    {{- include "ms-demo.labels" . | nindent 4 }}
+  namespace: {{ .Values.certificate.namespace }}
+spec:
+  secretName: {{ include "ms-demo.fullname" . }}-cert
+  issuerRef:
+    name: {{ .Values.certificate.issuer }}
+    kind: {{ .Values.certificate.kind }}
+  commonName: {{ .Values.certificate.commonName }}
+  dnsNames:
+  {{- toYaml .Values.certificate.dnsNames | nindent 2 }}
+---

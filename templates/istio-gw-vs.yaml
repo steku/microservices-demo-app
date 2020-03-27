@@ -1,0 +1,39 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ include "ms-demo.fullname" . }}
+  labels:
+    {{- include "ms-demo.labels" . | nindent 4 }}
+
+spec:
+  selector:
+    istio: {{ .Values.istio.istioSelector }}
+  servers:
+  - port:
+      number: {{ .Values.istio.port }}
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: "{{ include "ms-demo.fullname" . }}-cert"
+    hosts:
+      {{- toYaml .Values.certificate.dnsNames | nindent 4 }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "ms-demo.fullname" . }}
+  labels:
+    {{- include "ms-demo.labels" . | nindent 4 }}
+spec:
+  hosts:
+    {{- toYaml .Values.certificate.dnsNames | nindent 4 }} 
+  gateways:
+  - {{ include "ms-demo.fullname" . }}
+  http:
+  - route:
+    - destination:
+        host: {{ include "ms-demo.fullname" . }}-frontend
+        port:
+          number: 80
